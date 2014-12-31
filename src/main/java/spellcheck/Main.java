@@ -30,19 +30,6 @@ public class Main {
     return concat(deletes, concat(transposes, concat(replaces, inserts)));
   }
 
-  static Stream<String> edit2(String word) {
-    String alphabet = "abcdefghijklmnopqrstuvwxyz";
-    List<String[]> splits = IntStream.range(0, word.length())
-            .mapToObj(i -> new String[]{word.substring(0, i), word.substring(i)}).collect(toList());
-    Stream<String> deletes = splits.stream().filter(p -> p[1].length() > 1).map(p -> p[0] + p[1].substring(1));
-    Stream<String> transposes = splits.stream().filter(p -> p[1].length() > 2)
-            .map(p -> p[0] + p[1].substring(1, 2) + p[1].substring(0, 1) + p[1].substring(2));
-    Stream<String> replaces = splits.stream().filter(p -> p[1].length() > 1)
-            .flatMap(p -> alphabet.chars().mapToObj(c -> p[0] + (char) c + p[1].substring(1)));
-    Stream<String> inserts = splits.stream().flatMap(p -> alphabet.chars().mapToObj(c -> p[0] + (char) c + p[1]));
-    return concat(deletes, concat(transposes, concat(replaces, inserts)));
-  }
-
   static Stream<String> edits(String word) {
     return edit(word).flatMap(Main::edit);
   }
