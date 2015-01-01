@@ -17,14 +17,14 @@ public class Main {
 
   static Stream<String> edit(String w) {
     String alphabet = "abcdefghijklmnopqrstuvwxyz";
-    int l = w.length();
-    Stream<String> deletes = range(0, l).filter(i -> l - i > 1).mapToObj(i -> w.substring(0, i) + w.substring(i + 1));
-    Stream<String> transposes = range(0, l).filter(i -> l - i > 2)
+    int len = w.length();
+    Stream<String> deletes = range(0, len - 1).mapToObj(i -> w.substring(0, i) + w.substring(i + 1));
+    Stream<String> transposes = range(0, len - 2)
             .mapToObj(i -> w.substring(0, i) + w.substring(i + 1, i + 2) + w.substring(i, i + 1) + w.substring(i + 2));
-    Stream<String> replaces = range(0, l).filter(i -> l - i > 1).boxed()
-            .flatMap(i -> alphabet.chars().mapToObj(c -> w.substring(0, i) + (char)c + w.substring(i + 1)));
-    Stream<String> inserts = range(0, l).boxed()
-            .flatMap(i -> alphabet.chars().mapToObj(c -> w.substring(0, i) + (char)c + w.substring(i)));
+    Stream<String> replaces = range(0, len - 1).boxed()
+            .flatMap(i -> alphabet.chars().mapToObj(c -> w.substring(0, i) + (char) c + w.substring(i + 1)));
+    Stream<String> inserts = range(0, len).boxed()
+            .flatMap(i -> alphabet.chars().mapToObj(c -> w.substring(0, i) + (char) c + w.substring(i)));
     return concat(deletes, concat(transposes, concat(replaces, inserts)));
   }
 
