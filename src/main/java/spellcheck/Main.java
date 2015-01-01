@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -35,7 +37,7 @@ public class Main {
   }
 
   static List<String> known(Stream<String> words) {
-    return words.filter(NWORDS::containsKey).sorted((s1, s2) -> NWORDS.get(s2) - NWORDS.get(s1)).collect(toList());
+    return words.filter(NWORDS::containsKey).distinct().sorted((s1, s2) -> NWORDS.get(s2) - NWORDS.get(s1)).collect(toList());
   }
 
   @SafeVarargs static <T extends Collection<V>, V> T or(T f, Supplier<T>... s) {
@@ -51,7 +53,14 @@ public class Main {
   public static void main(String[] args) throws IOException {
     NWORDS = Files.lines(new File(args[0]).toPath())
             .map(String::toLowerCase)
-            .filter(s -> s.matches("[a-z]+"))
+            .flatMap(s -> {
+              Stream.Builder<String> matches = Stream.builder();
+              Matcher matcher = Pattern.compile("[a-z]+").matcher(s);
+              while (matcher.find()) {
+                matches.add(matcher.group());
+              }
+              return matches.build();
+            })
             .collect(toMap(s -> s, s -> 1, (v1, v2) -> v1 + v2));
 
     String line;
