@@ -4,29 +4,27 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static java.util.stream.IntStream.range;
 import static java.util.stream.Stream.concat;
 
 public class Main {
 
-  static Stream<String> edit(String word) {
+  static Stream<String> edit(String w) {
     String alphabet = "abcdefghijklmnopqrstuvwxyz";
-    List<String[]> splits = IntStream.range(0, word.length())
-            .mapToObj(i -> new String[]{word.substring(0, i), word.substring(i)}).collect(toList());
-    Stream<String> deletes = splits.stream().filter(p -> p[1].length() > 1).map(p -> p[0] + p[1].substring(1));
-    Stream<String> transposes = splits.stream().filter(p -> p[1].length() > 2)
-            .map(p -> p[0] + p[1].substring(1, 2) + p[1].substring(0, 1) + p[1].substring(2));
-    Stream<String> replaces = splits.stream().filter(p -> p[1].length() > 1)
-            .flatMap(p -> alphabet.chars().mapToObj(c -> p[0] + (char) c + p[1].substring(1)));
-    Stream<String> inserts = splits.stream().flatMap(p -> alphabet.chars().mapToObj(c -> p[0] + (char) c + p[1]));
+    int l = w.length();
+    Stream<String> deletes = range(0, l).filter(i -> l - i > 1).mapToObj(i -> w.substring(0, i) + w.substring(i + 1));
+    Stream<String> transposes = range(0, l).filter(i -> l - i > 2)
+            .mapToObj(i -> w.substring(0, i) + w.substring(i + 1, i + 2) + w.substring(i, i + 1) + w.substring(i + 2));
+    Stream<String> replaces = range(0, l).filter(i -> l - i > 1).boxed()
+            .flatMap(i -> alphabet.chars().mapToObj(c -> w.substring(0, i) + (char)c + w.substring(i + 1)));
+    Stream<String> inserts = range(0, l).boxed()
+            .flatMap(i -> alphabet.chars().mapToObj(c -> w.substring(0, i) + (char)c + w.substring(i)));
     return concat(deletes, concat(transposes, concat(replaces, inserts)));
   }
 
