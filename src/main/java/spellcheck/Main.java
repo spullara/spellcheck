@@ -1,23 +1,14 @@
 package spellcheck;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Spliterators;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
-import static java.util.Arrays.copyOfRange;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.*;
 import static java.util.stream.IntStream.range;
-import static java.util.stream.StreamSupport.stream;
+import static spellcheck.Util.*;
 
 public class Main {
 
@@ -31,7 +22,7 @@ public class Main {
             .flatMap(i -> alphabet.chars().mapToObj(c -> w.substring(0, i) + (char) c + w.substring(i + 1)));
     Stream<String> inserts = range(0, len).boxed()
             .flatMap(i -> alphabet.chars().mapToObj(c -> w.substring(0, i) + (char) c + w.substring(i)));
-    return concat(deletes, transposes, replaces, inserts);
+    return Util.concat(deletes, transposes, replaces, inserts);
   }
 
   static Stream<String> edits(String word) {
@@ -58,31 +49,5 @@ public class Main {
     while ((line = System.console().readLine()) != null) {
       System.out.println(correct(line.trim()));
     }
-  }
-
-  // Should be in standard library
-
-  @SafeVarargs
-  private static Stream<String> concat(Stream<String>... streams) {
-    return Stream.of(streams).flatMap(s -> s);
-  }
-
-  @SafeVarargs
-  private static <T extends Collection<V>, V> T or(T f, Supplier<T>... s) {
-    return f.isEmpty() ? s.length == 1 ? s[0].get() : or(s[0].get(), copyOfRange(s, 1, s.length)) : f;
-  }
-
-  private static Stream<String> find(String regex, String string) {
-    Matcher matcher = Pattern.compile(regex).matcher(string);
-    return stream(new Spliterators.AbstractSpliterator<String>(1, 0) {
-      @Override
-      public boolean tryAdvance(Consumer<? super String> action) {
-        boolean b = matcher.find();
-        if (b) {
-          action.accept(matcher.group());
-        }
-        return b;
-      }
-    }, false);
   }
 }
