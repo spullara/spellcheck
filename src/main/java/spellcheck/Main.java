@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Spliterators;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,6 +17,7 @@ import static java.util.Arrays.copyOfRange;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.IntStream.range;
+import static java.util.stream.StreamSupport.stream;
 
 public class Main {
 
@@ -24,7 +27,7 @@ public class Main {
     Stream<String> deletes = range(0, len - 1).mapToObj(i -> w.substring(0, i) + w.substring(i + 1));
     Stream<String> transposes = range(0, len - 1)
             .mapToObj(i -> w.substring(0, i) + w.substring(i + 1, i + 2) + w.substring(i, i + 1) + w.substring(i + 2));
-    Stream<String> replaces = range(0, len - 1).boxed()
+    Stream<String> replaces = range(0, len).boxed()
             .flatMap(i -> alphabet.chars().mapToObj(c -> w.substring(0, i) + (char) c + w.substring(i + 1)));
     Stream<String> inserts = range(0, len).boxed()
             .flatMap(i -> alphabet.chars().mapToObj(c -> w.substring(0, i) + (char) c + w.substring(i)));
@@ -70,11 +73,16 @@ public class Main {
   }
 
   private static Stream<String> find(String regex, String string) {
-    Stream.Builder<String> matches = Stream.builder();
     Matcher matcher = Pattern.compile(regex).matcher(string);
-    while (matcher.find()) {
-      matches.add(matcher.group());
-    }
-    return matches.build();
+    return stream(new Spliterators.AbstractSpliterator<String>(1, 0) {
+      @Override
+      public boolean tryAdvance(Consumer<? super String> action) {
+        boolean b = matcher.find();
+        if (b) {
+          action.accept(matcher.group());
+        }
+        return b;
+      }
+    }, false);
   }
 }
