@@ -22,7 +22,7 @@ public class Main {
             .flatMap(i -> alphabet.chars().mapToObj(c -> w.substring(0, i) + (char) c + w.substring(i + 1)));
     Stream<String> inserts = range(0, len).boxed()
             .flatMap(i -> alphabet.chars().mapToObj(c -> w.substring(0, i) + (char) c + w.substring(i)));
-    return Util.concat(deletes, transposes, replaces, inserts);
+    return concat(deletes, transposes, replaces, inserts);
   }
 
   static Stream<String> edits(String word) {
